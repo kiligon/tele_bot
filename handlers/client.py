@@ -71,6 +71,17 @@ async def game_count(message: types.Message, state: FSMContext):
     await message.answer(config.get("LANGUAGE","cart_commit"))
     await state.reset_state(with_data=False)
 
+
+async def game_id_back(message: types.Message):
+    message_text = message.text.replace("/", "")
+    if not (message_text.isdigit() and len(str(message_text))==7):
+        await message.answer(config.get("LANGUAGE","false_id"))
+        return
+    await state.update_data(game_id=message.text)
+    await message.answer(config.get("LANGUAGE","count"))
+    await Order.next()
+
+
 async def eng_select(callback_query: types.CallbackQuery):
     await callback_query.answer("English") #bot.answer_callback_query(callback_query.id, text="English", show_alert=True)
     config.read("locale.ini")
@@ -93,11 +104,13 @@ async def pay_message(callback_query: types.CallbackQuery):
 def register_handler_client(dp: Dispatcher):
     dp.register_message_handler(send_welcome, commands=['start'], state="*")
     dp.register_message_handler(select_lang, commands=['select_language'], state="*")
+        
     dp.register_callback_query_handler(eng_select, lambda c: c.data == 'en')
     dp.register_callback_query_handler(ru_select, lambda c: c.data == 'ru')
     dp.register_callback_query_handler(add_to_card_message, lambda c: c.data == 'add_to_card')
     dp.register_callback_query_handler(pay_message, lambda c: c.data == 'pay')
     dp.register_message_handler(game_id, state=Order.waiting_for_id)
+    dp.register_message_handler(game_id, state=Order.waiting_for_id, lambda message: message.text.startswith('/'))
     dp.register_message_handler(game_count, state=Order.waiting_for_count) 
     dp.register_message_handler(help, commands=['help'], state="*")
     dp.register_message_handler(catalog, commands=['catalog'], state="*")

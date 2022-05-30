@@ -17,7 +17,7 @@ def get_games(lang):
         g = requests.get("https://api.digiseller.ru/api/shop/products?seller_id={}&category_id={}&lang={}".format(seller_id, cat_id, lang), headers={'Accept': 'application/json'})
         print(g.json().keys())
         for game in g.json()["product"]:
-            games.append((game["id"], game["name"], game["base_price"])) #game["num_in_stock"]))
+            games.append(("/{}".fromat(game["id"]), game["name"], game["base_price"])) #game["num_in_stock"]))
 
     if lang == "en-US":
         table = tabulate(games, [["ID"][0], ["Game"][0], ["Price"][0]],tablefmt="fancy_grid")
